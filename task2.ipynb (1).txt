@@ -1,0 +1,277 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## **Day 02**"
+      ],
+      "metadata": {
+        "id": "bFIcQVMh2Rsj"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "FduLW3vq2P2j",
+        "outputId": "802814ae-7cd1-4e7c-d1b8-3d293a6f5c4b"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Gross Salary: 35000\n",
+            "Tax Amount: 3500.0\n",
+            "Net Salary: 31500.0\n"
+          ]
+        }
+      ],
+      "source": [
+        "# Inputs\n",
+        "basic_salary = 30000\n",
+        "bonus = 5000\n",
+        "tax_percentage = 10  # %\n",
+        "\n",
+        "# Calculations\n",
+        "gross_salary = basic_salary + bonus\n",
+        "tax_amount = (tax_percentage / 100) * gross_salary\n",
+        "net_salary = gross_salary - tax_amount\n",
+        "\n",
+        "# Output\n",
+        "print(\"Gross Salary:\", gross_salary)\n",
+        "print(\"Tax Amount:\", tax_amount)\n",
+        "print(\"Net Salary:\", net_salary)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "cgpa = 7.5\n",
+        "year = 3\n",
+        "\n",
+        "if cgpa >= 7.0 and year >= 3:\n",
+        "    print(\"Eligible for Internship\")\n",
+        "else:\n",
+        "    print(\"Not Eligible for Internship\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "umq04y9z4Go-",
+        "outputId": "fc0b5710-f93f-42cb-987e-6b230c7eefd9"
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Eligible for Internship\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "stored_username = \"admin\"\n",
+        "stored_password = \"admin123\"\n",
+        "\n",
+        "input_username = \"admin\"\n",
+        "input_password = \"admin123\"\n",
+        "\n",
+        "if input_username == stored_username and input_password == stored_password:\n",
+        "    print(\"Login Successful\")\n",
+        "else:\n",
+        "    print(\"Invalid Username or Password\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "c6VmG_3w4L3B",
+        "outputId": "44a8848b-86a8-452a-dcd7-b86f5150fbe2"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Login Successful\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "total_amount = 5000\n",
+        "discount = 10  # %\n",
+        "\n",
+        "# Apply discount using assignment operator\n",
+        "total_amount -= (discount / 100) * total_amount\n",
+        "\n",
+        "print(\"Final Amount after Discount:\", total_amount)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "En-PG7_o4Nv0",
+        "outputId": "b2236a49-808d-44c4-8734-ce2eabddc6ab"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Final Amount after Discount: 4500.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "enrolled_courses = [\"Python\", \"Data Science\", \"Machine Learning\"]\n",
+        "course_to_check = \"Python\"\n",
+        "\n",
+        "if course_to_check in enrolled_courses:\n",
+        "    print(\"Student is enrolled in Python course\")\n",
+        "else:\n",
+        "    print(\"Student is NOT enrolled in Python course\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "obioWky24Sov",
+        "outputId": "1412582b-300a-40f0-bea6-8f265ee806ed"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Student is enrolled in Python course\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "admin_role = {\"role\": \"admin\"}\n",
+        "current_role = admin_role\n",
+        "\n",
+        "if current_role is admin_role:\n",
+        "    print(\"Admin access granted\")\n",
+        "else:\n",
+        "    print(\"Access denied\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "opEfiT6y4YMf",
+        "outputId": "2ed5b0cd-21a6-4ae0-b60e-46a5da6e28fb"
+      },
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Admin access granted\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "transaction_id = 1025\n",
+        "\n",
+        "if transaction_id % 2 == 0:\n",
+        "    print(\"Transaction ID is Even\")\n",
+        "else:\n",
+        "    print(\"Transaction ID is Odd\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "D6J02Mws4bIg",
+        "outputId": "95f5ef11-1d45-49a3-a9db-4f3a68e3f48b"
+      },
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Transaction ID is Odd\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "performance_score = 82\n",
+        "\n",
+        "if performance_score >= 90:\n",
+        "    rating = \"Excellent\"\n",
+        "elif performance_score >= 75:\n",
+        "    rating = \"Very Good\"\n",
+        "elif performance_score >= 60:\n",
+        "    rating = \"Good\"\n",
+        "elif performance_score >= 40:\n",
+        "    rating = \"Average\"\n",
+        "else:\n",
+        "    rating = \"Needs Improvement\"\n",
+        "\n",
+        "print(\"Performance Rating:\", rating)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ssbbAznv4cWY",
+        "outputId": "f1db841d-0e0e-4aaa-dad9-a03e9210a623"
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Performance Rating: Very Good\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
