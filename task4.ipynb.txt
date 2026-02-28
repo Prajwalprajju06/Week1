@@ -1,0 +1,710 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": 2,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 90
+        },
+        "id": "6V5IUBY3_oPR",
+        "outputId": "d1f1de1e-a6a9-4213-ada7-93243a0bc34e"
+      },
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "     <input type=\"file\" id=\"files-222c88d3-6a12-4ba3-bf2e-31969e103f8f\" name=\"files[]\" multiple disabled\n",
+              "        style=\"border:none\" />\n",
+              "     <output id=\"result-222c88d3-6a12-4ba3-bf2e-31969e103f8f\">\n",
+              "      Upload widget is only available when the cell has been executed in the\n",
+              "      current browser session. Please rerun this cell to enable.\n",
+              "      </output>\n",
+              "      <script>// Copyright 2017 Google LLC\n",
+              "//\n",
+              "// Licensed under the Apache License, Version 2.0 (the \"License\");\n",
+              "// you may not use this file except in compliance with the License.\n",
+              "// You may obtain a copy of the License at\n",
+              "//\n",
+              "//      http://www.apache.org/licenses/LICENSE-2.0\n",
+              "//\n",
+              "// Unless required by applicable law or agreed to in writing, software\n",
+              "// distributed under the License is distributed on an \"AS IS\" BASIS,\n",
+              "// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n",
+              "// See the License for the specific language governing permissions and\n",
+              "// limitations under the License.\n",
+              "\n",
+              "/**\n",
+              " * @fileoverview Helpers for google.colab Python module.\n",
+              " */\n",
+              "(function(scope) {\n",
+              "function span(text, styleAttributes = {}) {\n",
+              "  const element = document.createElement('span');\n",
+              "  element.textContent = text;\n",
+              "  for (const key of Object.keys(styleAttributes)) {\n",
+              "    element.style[key] = styleAttributes[key];\n",
+              "  }\n",
+              "  return element;\n",
+              "}\n",
+              "\n",
+              "// Max number of bytes which will be uploaded at a time.\n",
+              "const MAX_PAYLOAD_SIZE = 100 * 1024;\n",
+              "\n",
+              "function _uploadFiles(inputId, outputId) {\n",
+              "  const steps = uploadFilesStep(inputId, outputId);\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  // Cache steps on the outputElement to make it available for the next call\n",
+              "  // to uploadFilesContinue from Python.\n",
+              "  outputElement.steps = steps;\n",
+              "\n",
+              "  return _uploadFilesContinue(outputId);\n",
+              "}\n",
+              "\n",
+              "// This is roughly an async generator (not supported in the browser yet),\n",
+              "// where there are multiple asynchronous steps and the Python side is going\n",
+              "// to poll for completion of each step.\n",
+              "// This uses a Promise to block the python side on completion of each step,\n",
+              "// then passes the result of the previous step as the input to the next step.\n",
+              "function _uploadFilesContinue(outputId) {\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  const steps = outputElement.steps;\n",
+              "\n",
+              "  const next = steps.next(outputElement.lastPromiseValue);\n",
+              "  return Promise.resolve(next.value.promise).then((value) => {\n",
+              "    // Cache the last promise value to make it available to the next\n",
+              "    // step of the generator.\n",
+              "    outputElement.lastPromiseValue = value;\n",
+              "    return next.value.response;\n",
+              "  });\n",
+              "}\n",
+              "\n",
+              "/**\n",
+              " * Generator function which is called between each async step of the upload\n",
+              " * process.\n",
+              " * @param {string} inputId Element ID of the input file picker element.\n",
+              " * @param {string} outputId Element ID of the output display.\n",
+              " * @return {!Iterable<!Object>} Iterable of next steps.\n",
+              " */\n",
+              "function* uploadFilesStep(inputId, outputId) {\n",
+              "  const inputElement = document.getElementById(inputId);\n",
+              "  inputElement.disabled = false;\n",
+              "\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  outputElement.innerHTML = '';\n",
+              "\n",
+              "  const pickedPromise = new Promise((resolve) => {\n",
+              "    inputElement.addEventListener('change', (e) => {\n",
+              "      resolve(e.target.files);\n",
+              "    });\n",
+              "  });\n",
+              "\n",
+              "  const cancel = document.createElement('button');\n",
+              "  inputElement.parentElement.appendChild(cancel);\n",
+              "  cancel.textContent = 'Cancel upload';\n",
+              "  const cancelPromise = new Promise((resolve) => {\n",
+              "    cancel.onclick = () => {\n",
+              "      resolve(null);\n",
+              "    };\n",
+              "  });\n",
+              "\n",
+              "  // Wait for the user to pick the files.\n",
+              "  const files = yield {\n",
+              "    promise: Promise.race([pickedPromise, cancelPromise]),\n",
+              "    response: {\n",
+              "      action: 'starting',\n",
+              "    }\n",
+              "  };\n",
+              "\n",
+              "  cancel.remove();\n",
+              "\n",
+              "  // Disable the input element since further picks are not allowed.\n",
+              "  inputElement.disabled = true;\n",
+              "\n",
+              "  if (!files) {\n",
+              "    return {\n",
+              "      response: {\n",
+              "        action: 'complete',\n",
+              "      }\n",
+              "    };\n",
+              "  }\n",
+              "\n",
+              "  for (const file of files) {\n",
+              "    const li = document.createElement('li');\n",
+              "    li.append(span(file.name, {fontWeight: 'bold'}));\n",
+              "    li.append(span(\n",
+              "        `(${file.type || 'n/a'}) - ${file.size} bytes, ` +\n",
+              "        `last modified: ${\n",
+              "            file.lastModifiedDate ? file.lastModifiedDate.toLocaleDateString() :\n",
+              "                                    'n/a'} - `));\n",
+              "    const percent = span('0% done');\n",
+              "    li.appendChild(percent);\n",
+              "\n",
+              "    outputElement.appendChild(li);\n",
+              "\n",
+              "    const fileDataPromise = new Promise((resolve) => {\n",
+              "      const reader = new FileReader();\n",
+              "      reader.onload = (e) => {\n",
+              "        resolve(e.target.result);\n",
+              "      };\n",
+              "      reader.readAsArrayBuffer(file);\n",
+              "    });\n",
+              "    // Wait for the data to be ready.\n",
+              "    let fileData = yield {\n",
+              "      promise: fileDataPromise,\n",
+              "      response: {\n",
+              "        action: 'continue',\n",
+              "      }\n",
+              "    };\n",
+              "\n",
+              "    // Use a chunked sending to avoid message size limits. See b/62115660.\n",
+              "    let position = 0;\n",
+              "    do {\n",
+              "      const length = Math.min(fileData.byteLength - position, MAX_PAYLOAD_SIZE);\n",
+              "      const chunk = new Uint8Array(fileData, position, length);\n",
+              "      position += length;\n",
+              "\n",
+              "      const base64 = btoa(String.fromCharCode.apply(null, chunk));\n",
+              "      yield {\n",
+              "        response: {\n",
+              "          action: 'append',\n",
+              "          file: file.name,\n",
+              "          data: base64,\n",
+              "        },\n",
+              "      };\n",
+              "\n",
+              "      let percentDone = fileData.byteLength === 0 ?\n",
+              "          100 :\n",
+              "          Math.round((position / fileData.byteLength) * 100);\n",
+              "      percent.textContent = `${percentDone}% done`;\n",
+              "\n",
+              "    } while (position < fileData.byteLength);\n",
+              "  }\n",
+              "\n",
+              "  // All done.\n",
+              "  yield {\n",
+              "    response: {\n",
+              "      action: 'complete',\n",
+              "    }\n",
+              "  };\n",
+              "}\n",
+              "\n",
+              "scope.google = scope.google || {};\n",
+              "scope.google.colab = scope.google.colab || {};\n",
+              "scope.google.colab._files = {\n",
+              "  _uploadFiles,\n",
+              "  _uploadFilesContinue,\n",
+              "};\n",
+              "})(self);\n",
+              "</script> "
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Saving app.log to app.log\n",
+            "Number of errors: 2\n"
+          ]
+        }
+      ],
+      "source": [
+        "#Count Errors & Store Error Lines Separately\n",
+        "from google.colab import files\n",
+        "files.upload()\n",
+        "def count_and_store_errors(input_file, output_file):\n",
+        "    error_count = 0\n",
+        "\n",
+        "    try:\n",
+        "        with open(input_file, \"r\") as file:\n",
+        "            lines = file.readlines()\n",
+        "\n",
+        "        with open(output_file, \"w\") as error_file:\n",
+        "            for line in lines:\n",
+        "                if \"ERROR\" in line:\n",
+        "                    error_count += 1\n",
+        "                    error_file.write(line)\n",
+        "\n",
+        "        return error_count\n",
+        "\n",
+        "    except FileNotFoundError:\n",
+        "        return \"Log file not found\"\n",
+        "\n",
+        "count = count_and_store_errors(\"app.log\", \"error_logs.txt\")\n",
+        "print(\"Number of errors:\", count)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Generate Daily Report Automatically\n",
+        "from datetime import datetime\n",
+        "\n",
+        "def generate_daily_report():\n",
+        "    today = datetime.now().strftime(\"%Y-%m-%d\")\n",
+        "    filename = f\"daily_report_{today}.txt\"\n",
+        "\n",
+        "    try:\n",
+        "        with open(filename, \"w\") as file:\n",
+        "            file.write(\"Daily Report\\n\")\n",
+        "            file.write(f\"Date: {today}\\n\")\n",
+        "            file.write(\"System running normally.\\n\")\n",
+        "\n",
+        "        print(\"Daily report generated:\", filename)\n",
+        "\n",
+        "    except Exception as e:\n",
+        "        print(\"Error generating report:\", e)\n",
+        "\n",
+        "generate_daily_report()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-z9xEXWYAq-5",
+        "outputId": "b3763ed2-0617-4440-a91c-558e39bf7246"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Daily report generated: daily_report_2026-02-07.txt\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import csv\n",
+        "\n",
+        "def filter_high_salary(input_csv, output_csv, min_salary):\n",
+        "    try:\n",
+        "        with open(input_csv, \"r\") as infile, open(output_csv, \"w\", newline=\"\") as outfile:\n",
+        "            reader = csv.DictReader(infile)\n",
+        "            fieldnames = reader.fieldnames\n",
+        "            writer = csv.DictWriter(outfile, fieldnames=fieldnames)\n",
+        "\n",
+        "            writer.writeheader()\n",
+        "\n",
+        "            for row in reader:\n",
+        "                if int(row[\"salary\"]) > min_salary:\n",
+        "                    writer.writerow(row)\n",
+        "\n",
+        "        print(\"High salary employees written successfully\")\n",
+        "\n",
+        "    except FileNotFoundError:\n",
+        "        print(\"CSV file not found\")\n",
+        "    except ValueError:\n",
+        "        print(\"Invalid salary value\")\n",
+        "filter_high_salary(\"employees.csv\", \"high_salary_employees.csv\", 50000)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "vof-I6bODZRU",
+        "outputId": "13c5de56-be18-42a2-9046-edb0a6c43905"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "High salary employees written successfully\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "try:\n",
+        "    x = int(\"abc\")\n",
+        "except ValueError:\n",
+        "    print(\"Invalid conversion\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "4Lr4r7vMEujD",
+        "outputId": "62411c26-0ea8-4de5-d8c3-a00790df4647"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Invalid conversion\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Handle Division Error\n",
+        "def safe_division(a, b):\n",
+        "    try:\n",
+        "        return a / b\n",
+        "    except ZeroDivisionError:\n",
+        "        return \"Error: Division by zero not allowed\"\n",
+        "\n",
+        "print(safe_division(10, 0))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ldCbDStnFZgl",
+        "outputId": "40814af4-b09c-466f-efff-95b26e675129"
+      },
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Error: Division by zero not allowed\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Handle Missing File and Log Error\n",
+        "def read_file(filename):\n",
+        "    try:\n",
+        "        with open(filename, \"r\") as file:\n",
+        "            return file.read()\n",
+        "    except FileNotFoundError:\n",
+        "        with open(\"error.log\", \"a\") as log:\n",
+        "            log.write(f\"{filename} not found\\n\")\n",
+        "        return \"File not found error logged\"\n",
+        "\n",
+        "print(read_file(\"data.txt\"))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "QPKFleeBFfll",
+        "outputId": "0e452a0a-4111-410f-9e57-4e18ecd99d98"
+      },
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "File not found error logged\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Validate User Input (Age & Salary)\n",
+        "def validate_user(age, salary):\n",
+        "    try:\n",
+        "        age = int(age)\n",
+        "        salary = float(salary)\n",
+        "\n",
+        "        if age <= 0 or salary <= 0:\n",
+        "            raise ValueError\n",
+        "\n",
+        "        return \"Valid input\"\n",
+        "    except ValueError:\n",
+        "        return \"Invalid age or salary\"\n",
+        "\n",
+        "print(validate_user(22, 25000))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "OV-ObQ3eFoEQ",
+        "outputId": "9e600645-4b9e-4ce6-95e8-e2fb88bce806"
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Valid input\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Custom Exception for ATM Withdrawal\n",
+        "class InsufficientBalanceError(Exception):\n",
+        "    pass\n",
+        "\n",
+        "def atm_withdraw(balance, amount):\n",
+        "    if amount > balance:\n",
+        "        raise InsufficientBalanceError(\"Insufficient balance\")\n",
+        "    return balance - amount\n",
+        "\n",
+        "try:\n",
+        "    print(atm_withdraw(5000, 6000))\n",
+        "except InsufficientBalanceError as e:\n",
+        "    print(e)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "EFY7U8N1Fx97",
+        "outputId": "3f5d263b-1721-4ec4-e5f4-bb9148fea1f2"
+      },
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Insufficient balance\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Student Record Management\n",
+        "def add_student(name):\n",
+        "    with open(\"students.txt\", \"a\") as file:\n",
+        "        file.write(name + \"\\n\")\n",
+        "\n",
+        "def view_students():\n",
+        "    try:\n",
+        "        with open(\"students.txt\", \"r\") as file:\n",
+        "            print(file.read())\n",
+        "    except FileNotFoundError:\n",
+        "        print(\"No student records found\")\n",
+        "\n",
+        "def search_student(name):\n",
+        "    try:\n",
+        "        with open(\"students.txt\", \"r\") as file:\n",
+        "            if name in file.read():\n",
+        "                print(\"Student found\")\n",
+        "            else:\n",
+        "                print(\"Student not found\")\n",
+        "    except FileNotFoundError:\n",
+        "        print(\"File not found\")\n",
+        "\n",
+        "add_student(\"John\")\n",
+        "add_student(\"Jane\")\n",
+        "view_students()\n",
+        "search_student(\"John\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Gi5pQDWxGD2i",
+        "outputId": "d4c3f3d1-3c65-405c-d690-ccaa894eb69f"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "John\n",
+            "Jane\n",
+            "\n",
+            "Student found\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Word Counter Tool\n",
+        "def word_counter(filename):\n",
+        "    try:\n",
+        "        with open(filename, \"r\") as file:\n",
+        "            text = file.read()\n",
+        "            lines = text.splitlines()\n",
+        "            words = text.split()\n",
+        "\n",
+        "            print(\"Lines:\", len(lines))\n",
+        "            print(\"Words:\", len(words))\n",
+        "            print(\"Characters:\", len(text))\n",
+        "\n",
+        "    except FileNotFoundError:\n",
+        "        print(\"File not found\")\n",
+        "\n",
+        "word_counter(\"summary.txt\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "sCfryMb9G7hS",
+        "outputId": "2f8d93c4-4cde-4574-f1f7-06641e81de2d"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "File not found\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#Employee Salary Analyzer\n",
+        "import csv\n",
+        "\n",
+        "def salary_analyzer(filename):\n",
+        "    try:\n",
+        "        salaries = []\n",
+        "\n",
+        "        with open(filename, \"r\") as file:\n",
+        "            reader = csv.DictReader(file)\n",
+        "            for row in reader:\n",
+        "                salaries.append(int(row[\"salary\"]))\n",
+        "\n",
+        "        print(\"Highest Salary:\", max(salaries))\n",
+        "        print(\"Lowest Salary:\", min(salaries))\n",
+        "        print(\"Average Salary:\", sum(salaries) / len(salaries))\n",
+        "\n",
+        "    except FileNotFoundError:\n",
+        "        print(\"Employees file not found\")\n",
+        "\n",
+        "salary_analyzer(\"employees.csv\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "YaVzVWyXHA3p",
+        "outputId": "a4469669-e902-4558-82b0-01e0babfdea6"
+      },
+      "execution_count": 12,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Highest Salary: 75000\n",
+            "Lowest Salary: 40000\n",
+            "Average Salary: 55000.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#ATM Simulation\n",
+        "class ATM:\n",
+        "    def __init__(self, balance):\n",
+        "        self.balance = balance\n",
+        "\n",
+        "    def withdraw(self, amount):\n",
+        "        try:\n",
+        "            if amount > self.balance:\n",
+        "                raise Exception(\"Insufficient balance\")\n",
+        "            self.balance -= amount\n",
+        "            print(\"Withdrawal successful. Balance:\", self.balance)\n",
+        "        except Exception as e:\n",
+        "            print(e)\n",
+        "\n",
+        "atm = ATM(5000)\n",
+        "atm.withdraw(2000)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "AAM85sR0HJ_c",
+        "outputId": "31b374ac-04c6-49c2-f175-9e891f6592b9"
+      },
+      "execution_count": 13,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Withdrawal successful. Balance: 3000\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#User Login System\n",
+        "def login(username, password):\n",
+        "    try:\n",
+        "        with open(\"user.txt\", \"r\") as file:\n",
+        "            for line in file:\n",
+        "                u, p = line.strip().split(\",\")\n",
+        "                if u == username and p == password:\n",
+        "                    return \"Login successful\"\n",
+        "            return \"Invalid credentials\"\n",
+        "    except FileNotFoundError:\n",
+        "        return \"User file not found\"\n",
+        "\n",
+        "print(login(\"admin\", \"admin123\"))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "StPJ3jCRHQ7B",
+        "outputId": "99b15a82-5816-4068-c6ef-3bcdd34e2bac"
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "User file not found\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
